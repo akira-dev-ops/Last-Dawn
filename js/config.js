@@ -4,7 +4,7 @@
 // =============================================================
 window.LD = window.LD || {};
 
-LD.VERSION = '0.1.0';
+LD.VERSION = '0.1.1';
 
 LD.CONFIG = {
   // Resolução lógica (largura fixa; altura se adapta à tela entre min e max)

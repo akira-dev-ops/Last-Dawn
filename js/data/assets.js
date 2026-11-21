@@ -10,8 +10,8 @@
 
 LD.ASSET_FILES = {
   images: {
-    loadingBg: '',      // fundo da tela de carregamento (720x1280)
-    menuBg: '',         // fundo do menu (720x1280)
+    loadingBg: 'assets/images/loading_bg.jpg', // fundo da tela de carregamento
+    menuBg: 'assets/images/menu_bg.jpg',       // fundo do menu (e das telas do menu)
     ground: '',         // ladrilho do chão (repetido), ex.: 256x256
 
     player: '',
@@ -61,6 +61,11 @@ LD.ASSET_FILES = {
     music_game: '',
   },
 };
+
+// Moldura da barra de carregamento desenhada DENTRO da imagem loadingBg.
+// Coordenadas em pixels da imagem original (imgW x imgH). O jogo encaixa a
+// barra de progresso aqui. Se trocar a imagem por uma sem moldura, use null.
+LD.LOADING_BAR = { imgW: 768, imgH: 1376, x: 98, y: 1307, w: 571, h: 12 };
 
 // Sons sintetizados usados enquanto não houver arquivo.
 // type: 'sine' | 'square' | 'sawtooth' | 'triangle'

@@ -160,9 +160,8 @@ LD.UI = {
     const img = LD.Assets.img(key);
     if (img) {
       // "cover": preenche sem distorcer
-      const s = Math.max(LD.W / img.width, LD.H / img.height);
-      const w = img.width * s, h = img.height * s;
-      g.drawImage(img, (LD.W - w) / 2, (LD.H - h) / 2, w, h);
+      const r = LD.Assets.coverRect(img);
+      g.drawImage(img, r.x, r.y, r.w, r.h);
       return;
     }
     const spr = LD.Sprites.get('dawnbg_' + LD.H, LD.W, LD.H, (c, w, h) => {
