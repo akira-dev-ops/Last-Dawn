@@ -36,10 +36,16 @@ LD.Enemy = {
   draw(g, e) {
     const d = e.def;
     const s = e.r * 2.3;
-    const white = e.flash > 0;
-    const spr = LD.Sprites.body(d.sprite, d.shape, d.color, s, white);
+    const spr = LD.Sprites.body(d.sprite, d.shape, d.color, s, false);
     const wob = d.shape === 'blob' ? Math.sin(e.t * 8 + e.seed) * 0.06 : 0;
-    const w = s * (1 + wob), h = s * (1 - wob);
-    g.drawImage(spr, e.x - w / 2, e.y - h / 2, w, h);
+    let w = s * (1 + wob), h = s * (1 - wob);
+    let x = e.x, y = e.y;
+    if (e.dashT > 0 && e.dashT < 0.5 && !e.dashing) x += Math.sin(e.t * 60) * 4; // tremor antes da investida
+    g.drawImage(spr, x - w / 2, y - h / 2, w, h);
+    if (e.flash > 0) {
+      g.globalAlpha = 0.65;
+      g.drawImage(LD.Sprites.body(d.sprite, d.shape, d.color, s, true), x - w / 2, y - h / 2, w, h);
+      g.globalAlpha = 1;
+    }
   },
 };
