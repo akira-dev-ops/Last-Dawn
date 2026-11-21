@@ -1,11 +1,13 @@
-// Base para telas de menu com lista rolável (Conquistas, Coleção, Créditos...)
-// Uso: LD.Panel.create({ title, contentHeight(), drawContent(g, top, w), extraButtons() })
+// Base para telas de menu com conteúdo rolável (Conquistas, Coleção, Créditos...)
+// Uso: LD.Panel.create({ title, subtitle(), contentHeight(), drawContent(g, top, w, left), onTap(x, y) })
 LD.Panel = {
   create(def) {
     return Object.assign({}, this.base, def);
   },
 
   base: {
+    bottomSpace: 0, // espaço reservado abaixo da lista (ex.: painel de detalhes)
+
     enter() {
       this.t = 0;
       this.scroll = 0;
@@ -19,8 +21,9 @@ LD.Panel = {
 
     layout() {
       const W = LD.W, H = LD.H;
-      this.view = { x: 30, y: 180, w: W - 60, h: H - 180 - 150 };
-      this.buttons = [LD.UI.button(W / 2 - 180, H - 120, 360, 86, 'Voltar', () => LD.Engine.go(LD.MenuScene))];
+      const top = this.hasSubtitle === false ? 160 : 196;
+      this.view = { x: 36, y: top, w: W - 72, h: H - top - 44 - this.bottomSpace };
+      this.buttons = [LD.UI.backButton(() => LD.Engine.go(LD.MenuScene))];
       if (this.extraButtons) this.buttons = this.buttons.concat(this.extraButtons());
     },
 
@@ -28,7 +31,7 @@ LD.Panel = {
 
     maxScroll() {
       const h = this.contentHeight ? this.contentHeight() : 0;
-      return Math.max(0, h - this.view.h + 20);
+      return Math.max(0, h - this.view.h + 10);
     },
 
     onDown(x, y, id) {
@@ -43,10 +46,12 @@ LD.Panel = {
       const dy = y - d.y;
       const now = performance.now();
       const dt = Math.max(1, now - d.t) / 1000;
-      this.scroll -= dy;
-      this.vel = -dy / dt;
-      d.y = y; d.t = now;
       if (Math.abs(y - d.sy) > 12) d.moved = true;
+      if (d.moved) {
+        this.scroll -= dy;
+        this.vel = -dy / dt;
+      }
+      d.y = y; d.t = now;
     },
 
     onUp(x, y, id) {
@@ -70,14 +75,14 @@ LD.Panel = {
     },
 
     render(g) {
-      const W = LD.W, H = LD.H, U = LD.UI, v = this.view;
+      const W = LD.W, U = LD.UI, v = this.view;
       U.background(g, 'menuBg', this.t);
-      g.fillStyle = 'rgba(8,4,16,0.55)';
-      g.fillRect(0, 0, W, H);
-      U.outlined(g, this.title, W / 2, 80, 60, '#ffd58a');
-      if (this.subtitle) U.text(g, this.subtitle(), W / 2, 140, 26, '#e8dcff', 'center', 'normal');
+      g.fillStyle = 'rgba(7,5,10,0.62)';
+      g.fillRect(0, 0, W, LD.H);
+      U.vignette(g, 0);
+      U.header(g, this.title, this.subtitle ? this.subtitle() : null);
 
-      U.panel(g, v.x - 6, v.y - 6, v.w + 12, v.h + 12, 'rgba(20,12,36,0.88)');
+      U.frame(g, v.x - 8, v.y - 8, v.w + 16, v.h + 16, { fill: 'rgba(10,8,14,0.82)' });
       g.save();
       g.beginPath();
       g.rect(v.x, v.y, v.w, v.h);
@@ -85,17 +90,28 @@ LD.Panel = {
       this.drawContent(g, v.y - this.scroll, v.w, v.x);
       g.restore();
 
-      // barra de rolagem
+      // sombras de rolagem (indicam que há mais conteúdo)
       const max = this.maxScroll();
       if (max > 0) {
+        if (this.scroll > 2) this.fade(g, v.y, 1);
+        if (this.scroll < max - 2) this.fade(g, v.y + v.h, -1);
         const total = v.h + max;
-        const bh = Math.max(60, v.h * (v.h / total));
+        const bh = Math.max(50, v.h * (v.h / total));
         const by = v.y + (v.h - bh) * (this.scroll / max);
-        U.roundRect(g, v.x + v.w - 8, by, 6, bh, 3);
-        g.fillStyle = 'rgba(255,255,255,0.35)';
-        g.fill();
+        g.fillStyle = 'rgba(201,164,92,0.5)';
+        g.fillRect(v.x + v.w + 1, by, 3, bh);
       }
+      if (this.drawFixed) this.drawFixed(g);
       U.drawButtons(g, this.buttons);
+    },
+
+    fade(g, y, dir) {
+      const v = this.view, h = 36;
+      const gr = g.createLinearGradient(0, y, 0, y + h * dir);
+      gr.addColorStop(0, 'rgba(10,8,14,0.95)');
+      gr.addColorStop(1, 'rgba(10,8,14,0)');
+      g.fillStyle = gr;
+      g.fillRect(v.x, dir > 0 ? y : y - h, v.w, h);
     },
   },
 };

@@ -10,6 +10,17 @@ LD.LoadingScene = {
     this.t = 0;
     this.leaving = 0;
     // 1º carrega só o fundo (aparece rápido); depois o resto
+    this.fontsReady = !document.fonts;
+    if (document.fonts) {
+      Promise.all([
+        document.fonts.load('700 40px "Cinzel"'),
+        document.fonts.load('900 40px "Cinzel"'),
+        document.fonts.load('400 20px "Alegreya Sans"'),
+        document.fonts.load('500 20px "Alegreya Sans"'),
+        document.fonts.load('700 20px "Alegreya Sans"'),
+      ]).catch(() => { }).then(() => { this.fontsReady = true; LD.Sprites.cache = {}; });
+      setTimeout(() => { this.fontsReady = true; }, 4000); // não trava se a fonte falhar
+    }
     LD.Assets.loadOne('loadingBg', () => {
       this.bgReady = true;
       LD.Assets.load(p => { this.progress = p; }, () => { this.loaded = true; });
@@ -22,7 +33,7 @@ LD.LoadingScene = {
     // barra anima suavemente, respeitando o tempo mínimo
     const target = Math.min(this.progress, this.t / this.MIN_TIME);
     this.shown += (target - this.shown) * Math.min(1, dt * 8);
-    if (this.loaded && this.shown > 0.985) {
+    if (this.loaded && this.fontsReady && this.shown > 0.985) {
       this.leaving += dt;
       if (this.leaving > 0.35) LD.Engine.go(LD.MenuScene);
     }
@@ -64,13 +75,8 @@ LD.LoadingScene = {
       g.fillStyle = 'rgba(0,0,0,0.25)';
       g.fillRect(0, 0, W, H);
     }
-    const pulse = 1 + Math.sin(this.t * 3) * 0.02;
-    g.save();
-    g.translate(W / 2, ty);
-    g.scale(pulse, pulse);
-    U.outlined(g, 'Last Dawn', 0, 0, 104, '#ffd58a');
-    g.restore();
-    U.outlined(g, 'sobreviva até o amanhecer', W / 2, ty + 78, 30, '#f2d7ff');
+    U.logo(g, W / 2, ty, 1 + Math.sin(this.t * 2) * 0.01);
+    U.label(g, 'SOBREVIVA ATÉ O AMANHECER', W / 2, ty + 100, 19, '#e6dccb', 'center', 5, 600);
 
     // barra de progresso
     const label = 'Carregando... ' + Math.round(this.shown * 100) + '%';
@@ -89,15 +95,13 @@ LD.LoadingScene = {
         const spr = LD.Sprites.glow('#ffc870', 24, '#fffbe8');
         g.drawImage(spr, fr.x + fw - 24, fr.y + fr.h / 2 - 24);
       }
-      U.outlined(g, label, W / 2, fr.y - 34, 26, '#fff');
+      U.label(g, label, W / 2, fr.y - 30, 18, '#e6dccb', 'center', 4);
     } else {
-      const bw = W - 160, bh = 30, bx = 80, by = img ? H * 0.88 : H * 0.7;
-      U.bar(g, bx, by, bw, bh, this.shown, '#ffb347');
-      g.lineWidth = 3;
-      g.strokeStyle = 'rgba(255,255,255,0.5)';
-      U.roundRect(g, bx, by, bw, bh, bh / 2);
-      g.stroke();
-      U.outlined(g, label, W / 2, by - 36, 26, '#fff');
+      const bw = W - 160, bh = 14, bx = 80, by = img ? H * 0.88 : H * 0.7;
+      U.bar(g, bx, by, bw, bh, this.shown, '#d8742a', null, '#ffe6a6');
+      U.diamond(g, bx - 10, by + bh / 2, 6, LD.COLORS.ink, LD.COLORS.gold);
+      U.diamond(g, bx + bw + 10, by + bh / 2, 6, LD.COLORS.ink, LD.COLORS.gold);
+      U.label(g, label, W / 2, by - 30, 18, '#e6dccb', 'center', 4);
     }
     g.globalAlpha = 1;
 

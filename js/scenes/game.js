@@ -40,7 +40,7 @@ LD.GameScene = {
     this.cands = [];
     LD.Joystick.end();
 
-    this.pauseBtn = LD.UI.button(LD.W - 92, 50, 76, 64, 'II', () => this.pause(), { color: 'rgba(40,24,70,0.85)', fontSize: 30 });
+    this.pauseBtn = LD.UI.button(LD.W - 86, 50, 62, 62, '', () => this.pause(), { style: 'icon', glyph: 'pause' });
     this.buttons = [this.pauseBtn];
 
     this.addPower(LD.STARTING_POWER);
@@ -53,7 +53,7 @@ LD.GameScene = {
   onHide() { if (this.mode === 'play') this.pause(); },
 
   onResize() {
-    this.pauseBtn.x = LD.W - 92;
+    this.pauseBtn.x = LD.W - 86;
     if (this.mode === 'levelup') LD.LevelUp.layout();
     if (this.mode === 'pause') this.buildPauseButtons();
   },
@@ -93,8 +93,8 @@ LD.GameScene = {
   buildPauseButtons() {
     const W = LD.W, H = LD.H, U = LD.UI;
     this.buttons = [
-      U.button(W / 2 - 220, H - 330, 440, 96, 'Continuar', () => this.resume(), { color: '#d8642a' }),
-      U.button(W / 2 - 220, H - 210, 440, 84, 'Desistir', () => this.die(true), { color: '#5a3a9a' }),
+      U.button(80, H - 300, W - 160, 104, 'CONTINUAR', () => this.resume(), { style: 'primary', fontSize: 40 }),
+      U.button(170, H - 170, W - 340, 72, 'Desistir', () => this.die(true)),
     ];
   },
 
@@ -411,7 +411,7 @@ LD.GameScene = {
     if (it.kind === 'heart') {
       const p = this.player;
       p.hp = Math.min(p.maxHp, p.hp + 30);
-      this.floatText('+30', p.x, p.y - 40, '#6bdc8b', 30);
+      this.floatText('+30', p.x, p.y - 40, '#9bd67e', 30);
       LD.Audio.play('pickup');
       return;
     }
@@ -541,7 +541,7 @@ LD.GameScene = {
     e.kx += kx * kr;
     e.ky += ky * kr;
     if (LD.Save.data.settings.damageNumbers) {
-      this.floatText('' + dmg, e.x + (Math.random() - 0.5) * 20, e.y - e.r, '#fff', 22);
+      this.floatText('' + dmg, e.x + (Math.random() - 0.5) * 20, e.y - e.r, '#f6eedd', 22);
     }
     if (!quiet) LD.Audio.play('hit');
     if (e.hp <= 0) this.kill(e);
@@ -574,7 +574,7 @@ LD.GameScene = {
     dmg = Math.max(1, Math.round(dmg * (1 - p.armor)));
     p.hp -= dmg;
     p.iframes = LD.CONFIG.playerIFrames;
-    this.floatText('-' + dmg, p.x, p.y - 40, '#ff5470', 30);
+    this.floatText('-' + dmg, p.x, p.y - 40, '#ff6a5a', 30);
     LD.Audio.play('hurt');
     LD.vibrate(40);
     if (p.hp <= 0) { p.hp = 0; this.die(false); }
@@ -787,7 +787,7 @@ LD.GameScene = {
       g.fillRect(0, 0, W, H);
     }
 
-    LD.HUD.draw(g, this);
+    if (this.mode === 'play' || this.mode === 'dying') LD.HUD.draw(g, this);
     if (this.mode === 'play') LD.Joystick.draw(g);
     else if (this.mode === 'levelup') LD.LevelUp.draw(g, this);
     else if (this.mode === 'pause') this.drawPause(g);
@@ -823,21 +823,48 @@ LD.GameScene = {
   drawPlayerHp(g) {
     const p = this.player;
     const w = 64;
-    LD.UI.bar(g, p.x - w / 2, p.y + p.r + 14, w, 9, p.hp / p.maxHp, '#ff5470', 'rgba(0,0,0,0.7)');
+    const x = p.x - w / 2, y = p.y + p.r + 14;
+    g.fillStyle = 'rgba(6,4,8,0.85)';
+    g.fillRect(x - 2, y - 2, w + 4, 11);
+    g.fillStyle = p.hp / p.maxHp > 0.3 ? '#c8433f' : '#ff6a4a';
+    g.fillRect(x, y, w * Math.max(0, p.hp / p.maxHp), 7);
+    g.fillStyle = 'rgba(255,255,255,0.22)';
+    g.fillRect(x, y, w * Math.max(0, p.hp / p.maxHp), 2);
   },
 
   drawPause(g) {
-    const W = LD.W, H = LD.H, U = LD.UI;
-    g.fillStyle = 'rgba(5,2,12,0.75)';
+    const W = LD.W, H = LD.H, U = LD.UI, C = LD.COLORS;
+    g.fillStyle = 'rgba(5,3,8,0.84)';
     g.fillRect(0, 0, W, H);
-    U.outlined(g, 'Pausado', W / 2, 250, 72, '#ffd58a');
-    U.text(g, 'Poderes', W / 2, 330, 30, LD.COLORS.dim);
-    let y = 385;
+    U.label(g, 'PAUSA', W / 2, 150, 58, C.goldLight, 'center', 10, 900);
+    U.divider(g, W / 2, 196, 320);
+    U.text(g, LD.fmtTime(this.time) + '  ·  nível ' + this.level + '  ·  ' + this.kills + ' abates', W / 2, 232, 24, C.dim, 'center', 500);
+
+    // poderes
+    const n = this.powers.length;
+    const fx = 56, fw = W - 112, fy = 276;
+    const ids = Object.keys(this.passives);
+    const avail = H - 300 - 30 - fy - 54 - (ids.length ? 96 : 0);
+    const rowH = Math.min(66, Math.floor(avail / Math.max(1, n)));
+    const fh = 54 + n * rowH + (ids.length ? 96 : 0);
+    U.frame(g, fx, fy, fw, fh, { fill: 'rgba(12,9,16,0.92)' });
+    U.label(g, 'PODERES', W / 2, fy + 32, 15, C.gold, 'center', 4, 600);
+    let y = fy + 54;
     for (const inst of this.powers) {
-      U.icon(g, inst.def, 120, y, 50);
-      U.text(g, inst.def.name, 160, y, 28, '#fff', 'left');
-      U.text(g, 'Nv ' + inst.level + '/' + inst.def.maxLevel, W - 110, y, 24, '#9fd8ff', 'right');
-      y += 56;
+      U.icon(g, inst.def, fx + 54, y + rowH / 2, 48);
+      U.text(g, inst.def.name, fx + 96, y + rowH / 2, 25, C.text, 'left', 500);
+      U.pips(g, fx + fw - 30, y + rowH / 2, inst.level, inst.def.maxLevel, 4.5, 'right');
+      y += rowH;
+    }
+    if (ids.length) {
+      g.fillStyle = 'rgba(201,164,92,0.15)';
+      g.fillRect(fx + 24, y + 4, fw - 48, 1);
+      let x = W / 2 - ((ids.length - 1) * 70) / 2;
+      for (const id of ids) {
+        U.icon(g, LD.PASSIVE[id], x, y + 50, 46);
+        U.outlined(g, '' + this.passives[id], x + 18, y + 68, 16, C.goldLight, 'center', 'body');
+        x += 70;
+      }
     }
     U.drawButtons(g, this.buttons);
   },

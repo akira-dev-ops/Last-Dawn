@@ -1,7 +1,7 @@
 // Service worker: deixa o jogo funcionando offline.
 // IMPORTANTE: ao publicar uma nova versão, mude CACHE_VERSION
 // para que os celulares baixem os arquivos atualizados.
-const CACHE_VERSION = 'lastdawn-v0.1.1';
+const CACHE_VERSION = 'lastdawn-v0.2.0';
 
 const PRECACHE = [
   './',
@@ -13,6 +13,10 @@ const PRECACHE = [
   './icons/icon-maskable-512.png',
   './assets/images/loading_bg.jpg',
   './assets/images/menu_bg.jpg',
+  './assets/fonts/cinzel.woff2',
+  './assets/fonts/alegreya-sans-400.woff2',
+  './assets/fonts/alegreya-sans-500.woff2',
+  './assets/fonts/alegreya-sans-700.woff2',
   './js/config.js',
   './js/data/assets.js',
   './js/data/enemies.js',
@@ -28,6 +32,7 @@ const PRECACHE = [
   './js/core/pool.js',
   './js/core/grid.js',
   './js/core/engine.js',
+  './js/ui/glyphs.js',
   './js/ui/ui.js',
   './js/ui/joystick.js',
   './js/ui/hud.js',
