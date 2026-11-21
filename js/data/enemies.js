@@ -7,19 +7,19 @@
 // move: 'chase' (padrão) | 'zigzag' | 'dash' (investida periódica)
 // =============================================================
 LD.ENEMIES = [
-  { id: 'slime', name: 'Gosma Sombria', hp: 10, speed: 72, dmg: 8, r: 20, xp: 1,
+  { id: 'slime', name: 'Gosma Sombria', hp: 10, speed: 72, dmg: 6, r: 20, xp: 1,
     color: '#7d4bd8', shape: 'blob', sprite: 'enemy_slime' },
 
-  { id: 'bat', name: 'Morcego da Penumbra', hp: 6, speed: 135, dmg: 5, r: 16, xp: 1,
+  { id: 'bat', name: 'Morcego da Penumbra', hp: 6, speed: 130, dmg: 4, r: 16, xp: 1,
     color: '#d84b6a', shape: 'bat', sprite: 'enemy_bat' },
 
-  { id: 'wisp', name: 'Fogo-Fátuo', hp: 18, speed: 105, dmg: 9, r: 18, xp: 2,
+  { id: 'wisp', name: 'Fogo-Fátuo', hp: 18, speed: 100, dmg: 7, r: 18, xp: 2,
     color: '#4bd8c4', shape: 'wisp', sprite: 'enemy_wisp', move: 'zigzag' },
 
-  { id: 'brute', name: 'Bruto de Pedra', hp: 55, speed: 52, dmg: 14, r: 30, xp: 4,
+  { id: 'brute', name: 'Bruto de Pedra', hp: 55, speed: 52, dmg: 11, r: 30, xp: 4,
     color: '#8a7a5a', shape: 'square', sprite: 'enemy_brute', knockResist: 0.6 },
 
-  { id: 'knight', name: 'Cavaleiro Oco', hp: 110, speed: 68, dmg: 18, r: 26, xp: 6,
+  { id: 'knight', name: 'Cavaleiro Oco', hp: 110, speed: 66, dmg: 14, r: 26, xp: 6,
     color: '#5a6a8a', shape: 'knight', sprite: 'enemy_knight', knockResist: 0.75 },
 
   // ----- Chefes -----

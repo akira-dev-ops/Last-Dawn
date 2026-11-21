@@ -166,9 +166,10 @@ LD.GameScene = {
   difficulty() {
     const m = this.time / 60, D = LD.DIFFICULTY;
     const o = this._mult || (this._mult = {});
-    o.hp = 1 + m * D.hpPerMin;
+    o.hp = 1 + m * D.hpPerMin + m * m * (D.hpPerMin2 || 0);
     o.dmg = 1 + m * D.dmgPerMin;
     o.speed = 1 + m * D.speedPerMin;
+    o.xp = 1 + m * (D.xpPerMin || 0);
     return o;
   },
 

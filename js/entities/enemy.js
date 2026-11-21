@@ -21,7 +21,7 @@ LD.Enemy = {
     e.maxHp = e.hp = def.hp * mult.hp;
     e.speed = def.speed * mult.speed;
     e.dmg = def.dmg * mult.dmg;
-    e.xp = def.xp;
+    e.xp = Math.max(1, Math.round(def.xp * (mult.xp || 1)));
     e.kx = e.ky = 0;
     e.flash = 0; e.slow = 0;
     e.seed = Math.random() * 100;

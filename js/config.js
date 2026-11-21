@@ -23,8 +23,8 @@ LD.CONFIG = {
   playerSpeed: 230,
   playerHp: 100,
   playerRadius: 22,
-  playerIFrames: 0.45,
-  magnetRadius: 110,
+  playerIFrames: 0.5,
+  magnetRadius: 150,
 
   // Slots
   maxPowers: 6,

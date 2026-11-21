@@ -32,9 +32,11 @@ LD.BOSSES = {
 };
 
 // Dificuldade cresce com o tempo (por minuto)
-LD.DIFFICULTY = { hpPerMin: 0.16, dmgPerMin: 0.06, speedPerMin: 0.012 };
+// vida = 1 + min*hpPerMin + min²*hpPerMin2 (cresce mais rápido no fim)
+// xpPerMin: inimigos soltam mais XP com o passar do tempo
+LD.DIFFICULTY = { hpPerMin: 0.15, hpPerMin2: 0.025, dmgPerMin: 0.07, speedPerMin: 0.012, xpPerMin: 0.1 };
 
 // XP necessária para passar do nível n para n+1
 LD.xpToNext = function (level) {
-  return Math.floor(5 + (level - 1) * 7 + Math.pow(level - 1, 1.5) * 1.5);
+  return Math.floor(5 + (level - 1) * 3.5 + Math.pow(level - 1, 1.35));
 };
