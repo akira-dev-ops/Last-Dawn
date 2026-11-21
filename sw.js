@@ -1,7 +1,7 @@
 // Service worker: deixa o jogo funcionando offline.
 // IMPORTANTE: ao publicar uma nova versão, mude CACHE_VERSION
 // para que os celulares baixem os arquivos atualizados.
-const CACHE_VERSION = 'lastdawn-v1';
+const CACHE_VERSION = 'lastdawn-v0.1.0';
 
 const PRECACHE = [
   './',
@@ -14,19 +14,33 @@ const PRECACHE = [
   './js/config.js',
   './js/data/assets.js',
   './js/data/enemies.js',
+  './js/data/powers.js',
+  './js/data/passives.js',
+  './js/data/waves.js',
+  './js/data/achievements.js',
   './js/core/save.js',
   './js/core/audio.js',
   './js/core/assets.js',
   './js/core/sprites.js',
   './js/core/input.js',
+  './js/core/pool.js',
+  './js/core/grid.js',
   './js/core/engine.js',
   './js/ui/ui.js',
   './js/ui/joystick.js',
+  './js/ui/hud.js',
+  './js/ui/levelup.js',
+  './js/ui/panel.js',
   './js/entities/player.js',
   './js/entities/enemy.js',
+  './js/entities/projectile.js',
+  './js/powers/behaviors.js',
   './js/scenes/loading.js',
   './js/scenes/menu.js',
   './js/scenes/game.js',
+  './js/scenes/gameover.js',
+  './js/scenes/settings.js',
+  './js/scenes/panels.js',
   './js/main.js',
 ];
 
