@@ -1,9 +1,10 @@
-// Tela de Configurações: volume, vibração e opções de desempenho
+// Tela de Ajustes: volume, vibração e opções de desempenho
 LD.SettingsScene = {
   enter() {
     this.t = 0;
     this.confirmReset = 0;
     this.dragVol = null;
+    this.toastT = 0;
     this.layout();
   },
 
@@ -11,40 +12,50 @@ LD.SettingsScene = {
   onKey(code) { if (code === 'Escape') LD.Engine.go(LD.MenuScene); },
 
   layout() {
-    const W = LD.W, H = LD.H, U = LD.UI, S = LD.Save.data.settings;
-    this.slider = { x: 150, y: 270, w: W - 300, h: 60 };
-    const toggle = (key, label, y) => {
-      const b = U.button(70, y, W - 140, 86, '', () => {
-        S[key] = !S[key];
-        LD.Save.save();
-        if (key === 'vibration' && S[key]) LD.vibrate(60);
-        b.label = label + ': ' + (S[key] ? 'Sim' : 'Não');
-      }, { fontSize: 32 });
-      b.label = label + ': ' + (S[key] ? 'Sim' : 'Não');
-      return b;
-    };
-    const vol = d => () => this.setVolume(Math.round((S.volume + d) * 10) / 10);
-    this.buttons = [
-      U.button(50, 258, 84, 84, '−', vol(-0.1), { fontSize: 48 }),
-      U.button(W - 134, 258, 84, 84, '+', vol(0.1), { fontSize: 48 }),
-      toggle('vibration', 'Vibração', 400),
-      toggle('damageNumbers', 'Números de dano', 510),
-      toggle('showFps', 'Mostrar FPS', 620),
-      U.button(70, 760, W - 140, 80, 'Apagar progresso', b => {
-        if (this.confirmReset > 0) {
-          LD.Save.reset();
-          LD.Audio.setVolume(LD.Save.data.settings.volume);
-          this.layout();
-          this.toast = 'Progresso apagado.';
-          this.toastT = 2;
-          return;
-        }
-        this.confirmReset = 3;
-        b.label = 'Toque de novo para confirmar';
-      }, { color: '#7a2a3a', fontSize: 28 }),
-      U.button(W / 2 - 180, H - 120, 360, 86, 'Voltar', () => LD.Engine.go(LD.MenuScene)),
+    const W = LD.W, U = LD.UI, C = LD.COLORS, S = LD.Save.data.settings;
+    this.box = { x: 36, y: 186, w: W - 72 };
+    const bx = this.box.x, bw = this.box.w;
+    this.slider = { x: bx + 40, y: this.box.y + 104, w: bw - 80, h: 12 };
+
+    // linha com interruptor (a linha inteira é clicável)
+    const toggleRow = (key, title, hint, y) => U.button(bx, y, bw, 104, '', () => {
+      S[key] = !S[key];
+      LD.Save.save();
+      if (key === 'vibration' && S[key]) LD.vibrate(60);
+    }, {
+      draw: (g, b) => {
+        if (b.pressed) { g.fillStyle = 'rgba(201,164,92,0.08)'; g.fillRect(b.x + 2, b.y, b.w - 4, b.h); }
+        U.label(g, title, b.x + 40, b.y + 40, 22, C.text, 'left', 3);
+        U.text(g, hint, b.x + 40, b.y + 72, 20, C.dim, 'left', 400);
+        U.toggle(g, b.x + b.w - 132, b.y + 30, S[key]);
+        g.fillStyle = 'rgba(201,164,92,0.14)';
+        g.fillRect(b.x + 24, b.y + b.h - 1, b.w - 48, 1);
+      },
+    });
+
+    let y = this.box.y + 160;
+    this.rows = [
+      toggleRow('vibration', 'VIBRAÇÃO', 'Ao tomar dano e subir de nível', y),
+      toggleRow('damageNumbers', 'NÚMEROS DE DANO', 'Desligue se o jogo ficar lento', y + 104),
+      toggleRow('showFps', 'MOSTRAR FPS', 'Exibe o desempenho na tela', y + 208),
     ];
-    this.resetBtn = this.buttons[5];
+    this.box.h = 160 + 104 * 3 + 20;
+
+    this.resetBtn = U.button(W / 2 - 200, this.box.y + this.box.h + 44, 400, 56, 'APAGAR PROGRESSO', b => {
+      if (this.confirmReset > 0) {
+        LD.Save.reset();
+        LD.Audio.setVolume(LD.Save.data.settings.volume);
+        this.confirmReset = 0;
+        b.label = 'APAGAR PROGRESSO';
+        this.toast = 'Progresso apagado.';
+        this.toastT = 2;
+        return;
+      }
+      this.confirmReset = 3;
+      b.label = 'TOQUE DE NOVO PARA CONFIRMAR';
+    }, { style: 'ghost', fontSize: 18, textColor: '#d07a6a' });
+
+    this.buttons = [U.backButton(() => LD.Engine.go(LD.MenuScene))].concat(this.rows, [this.resetBtn]);
   },
 
   setVolume(v) {
@@ -56,7 +67,7 @@ LD.SettingsScene = {
 
   onDown(x, y, id) {
     const s = this.slider;
-    if (x >= s.x - 20 && x <= s.x + s.w + 20 && y >= s.y - 10 && y <= s.y + s.h + 10) {
+    if (x >= s.x - 30 && x <= s.x + s.w + 30 && y >= s.y - 40 && y <= s.y + s.h + 40) {
       this.dragVol = id;
       this.onMove(x, y, id);
     }
@@ -74,30 +85,38 @@ LD.SettingsScene = {
     this.t += dt;
     if (this.confirmReset > 0) {
       this.confirmReset -= dt;
-      if (this.confirmReset <= 0) this.resetBtn.label = 'Apagar progresso';
+      if (this.confirmReset <= 0) this.resetBtn.label = 'APAGAR PROGRESSO';
     }
     if (this.toastT > 0) this.toastT -= dt;
   },
 
   render(g) {
-    const W = LD.W, H = LD.H, U = LD.UI, S = LD.Save.data.settings, s = this.slider;
+    const W = LD.W, H = LD.H, U = LD.UI, C = LD.COLORS, S = LD.Save.data.settings, s = this.slider, b = this.box;
     U.background(g, 'menuBg', this.t);
-    g.fillStyle = 'rgba(8,4,16,0.6)';
+    g.fillStyle = 'rgba(7,5,10,0.62)';
     g.fillRect(0, 0, W, H);
-    U.outlined(g, 'Configurações', W / 2, 90, 58, '#ffd58a');
+    U.vignette(g, 0);
+    U.header(g, 'AJUSTES');
 
-    U.text(g, 'Volume: ' + Math.round(S.volume * 100) + '%', W / 2, 220, 32, '#fff');
-    U.bar(g, s.x, s.y + 18, s.w, 24, S.volume, LD.COLORS.accent);
-    const kx = s.x + s.w * S.volume;
-    g.beginPath(); g.arc(kx, s.y + 30, 24, 0, Math.PI * 2);
-    g.fillStyle = '#fff'; g.fill();
+    U.frame(g, b.x, b.y, b.w, b.h, { fill: 'rgba(10,8,14,0.82)' });
+
+    // volume
+    U.label(g, 'VOLUME', b.x + 40, b.y + 52, 22, C.text, 'left', 3);
+    U.text(g, Math.round(S.volume * 100) + '%', b.x + b.w - 40, b.y + 52, 26, C.goldLight, 'right', 700);
+    U.bar(g, s.x, s.y, s.w, s.h, S.volume, '#b54a22', null, '#f0b070');
+    const kx = s.x + s.w * S.volume, ky = s.y + s.h / 2;
+    U.diamond(g, kx, ky, 17, '#1a1210', C.goldLight);
+    U.diamond(g, kx, ky, 8, this.dragVol !== null ? '#fff2cf' : C.gold);
+    g.fillStyle = 'rgba(201,164,92,0.14)';
+    g.fillRect(b.x + 24, b.y + 159, b.w - 48, 1);
 
     U.drawButtons(g, this.buttons);
-    U.text(g, 'Desligue "Números de dano" se o jogo ficar lento.', W / 2, 875, 22, LD.COLORS.dim, 'center', 'normal');
 
     if (this.toastT > 0) {
-      U.panel(g, 100, H - 250, W - 200, 70);
-      U.text(g, this.toast, W / 2, H - 215, 28, '#fff');
+      g.globalAlpha = Math.min(1, this.toastT * 2);
+      U.frame(g, 110, H - 170, W - 220, 70, { ornaments: true });
+      U.text(g, this.toast, W / 2, H - 135, 26, C.text);
+      g.globalAlpha = 1;
     }
   },
 };
